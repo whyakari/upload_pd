@@ -6,3 +6,9 @@ chmod +x uwu \
 ```
 
 need `PIXELDRAIN_API_KEY` required.
+
+# features
+ - dtbo
+ - vendor_boot
+ - boot
+ - zip
