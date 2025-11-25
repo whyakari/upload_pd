@@ -1,8 +1,6 @@
 ## PixelDrain
 ```
-wget https://github.com/whyakari/pixeldrain/raw/refs/heads/main/uwu \
-chmod +x uwu \
-./uwu {your device}
+wget https://github.com/whyakari/pixeldrain/raw/refs/heads/main/uwu && chmod +x uwu && ./uwu {your device}
 ```
 
 need `PIXELDRAIN_API_KEY` required.
@@ -11,4 +9,4 @@ need `PIXELDRAIN_API_KEY` required.
  - dtbo
  - vendor_boot
  - boot
- - zip
+ - zip (newest)
