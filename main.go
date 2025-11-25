@@ -11,6 +11,7 @@ import (
     "path/filepath"
     "runtime"
     "strings"
+    "sort"
 )
 
 const (
@@ -108,22 +109,6 @@ func pdUploadMultiple(pdPath string, files []string) error {
     return cmd.Run()
 }
 
-func extractZipVersion(path string) int {
-    base := filepath.Base(path)
-    base = strings.TrimSuffix(base, ".zip")
-
-    parts := strings.Split(base, "-")
-    if len(parts) == 0 {
-        return 0
-    }
-
-    last := parts[len(parts)-1]
-
-    var num int
-    fmt.Sscanf(last, "%d", &num)
-    return num
-}
-
 func main() {
     if len(os.Args) != 2 {
         fmt.Println("Usage: uwu <device>")
@@ -156,29 +141,51 @@ func main() {
     if err != nil {
         fmt.Println("Erro procurando ZIPs:", err)
     } else {
-        var normalZips []string
+        var zips []string
         for _, z := range zipFiles {
             if strings.HasSuffix(strings.ToLower(z), "-ota.zip") {
                 fmt.Printf("Ignorando OTA: %s\n", z)
                 continue
             }
-            normalZips = append(normalZips, z)
+            zips = append(zips, z)
         }
 
-        if len(normalZips) > 0 {
-            latest := normalZips[0]
-            latestNum := extractZipVersion(latest)
-
-            for _, z := range normalZips[1:] {
-                v := extractZipVersion(z)
-                if v > latestNum {
-                    latest = z
-                    latestNum = v
-                }
+        if len(zips) > 0 {
+            type zipInfo struct {
+                path string
+                ts   int64
             }
 
-            fmt.Printf("ZIP mais recente encontrado: %s\n", latest)
-            uploadFiles = append(uploadFiles, latest)
+            var parsed []zipInfo
+
+            for _, z := range zips {
+                base := filepath.Base(z)
+
+                parts := strings.Split(base, "-")
+                if len(parts) < 3 {
+                    continue
+                }
+
+                date := parts[len(parts)-2]
+                time := strings.TrimSuffix(parts[len(parts)-1], ".zip") // HHMM
+
+                tsStr := date + time
+
+                var ts int64
+                fmt.Sscanf(tsStr, "%d", &ts)
+
+                parsed = append(parsed, zipInfo{path: z, ts: ts})
+            }
+
+            if len(parsed) > 0 {
+                sort.Slice(parsed, func(i, j int) bool {
+                    return parsed[i].ts > parsed[j].ts
+                })
+
+                latest := parsed[0].path
+                fmt.Printf("ZIP mais recente encontrado: %s\n", latest)
+                uploadFiles = append(uploadFiles, latest)
+            }
         } else {
             fmt.Println("Nenhum ZIP normal encontrado (ignorando OTA).")
         }
