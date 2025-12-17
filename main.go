@@ -195,6 +195,7 @@ func main() {
         filepath.Join(baseDir, "dtbo.img"),
         filepath.Join(baseDir, "vendor_boot.img"),
         filepath.Join(baseDir, "boot.img"),
+		filepath.Join(baseDir, "vendor_dlkm.img"),
     }
 
     for _, pattern := range otherPatterns {
